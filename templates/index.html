@@ -1,12 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
-  <title>Document</title>
-</head>
-<body>
-  <h1 class="text-blue-500">Tailwind Test</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Spotify Top 5 - Home{% endblock %}
+
+{% block content %}
+<section class="max-w-lg mx-auto text-center">
+  <p class="text-lg mb-8">
+    {% if not logged_in %}
+    Accedi con Spotify per scoprire i tuoi artisti e le tue canzoni piu' ascoltate di sempre.
+    {% else %}
+    Scopri i tuoi artisti e le canzoni piu' ascoltate di sempre
+    {% endif %}
+  </p>
+  {% if not logged_in %}
+  <a href="{{ url_for('login') }}" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Accedi</a>
+  {% endif %}
+</section>
+{% endblock %}
