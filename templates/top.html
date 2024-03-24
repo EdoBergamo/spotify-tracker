@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Spotify Top 5 - Top Artists and Tracks{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+  <h1 class="text-3xl font-bold mb-4">Top Artists</h1>
+  <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for artist in top_artists %}
+    <li class="bg-white p-6 rounded shadow-md">
+      <h2 class="text-xl font-bold">{{ artist }}</h2>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="container mx-auto py-8">
+  <h1 class="text-3xl font-bold mb-4">Top Tracks</h1>
+  <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for index, track in top_tracks|jinja2_enumerate %}
+    <li class="bg-white p-6 rounded shadow-md flex items-center">
+      <small class="pr-2">{{ index + 1 }}</small>
+      <h2 class="text-xl font-bold"> {{ track }}</h2>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

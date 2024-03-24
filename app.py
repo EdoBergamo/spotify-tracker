@@ -59,6 +59,24 @@ def show_recent():
     return render_template('recent.html', recent_tracks=recent_tracks)
   else:
     return "Errore durante l'autenticazione con spotify"
+  
+@app.route('/top')
+def show_top():
+  if 'token_info' not in session:
+    return redirect(url_for('login'))
+
+  sp = create_spotify_client(session['token_info'])
+  
+  if sp:
+    top_artists, top_tracks = get_top_artists_and_tracks(sp)
+    return render_template('top.html', top_artists=top_artists, top_tracks=top_tracks)
+  else:
+    return "Errore durante l'autenticazione con spotify"
+
+# Custom Filter
+@app.template_filter()
+def jinja2_enumerate(iterable):
+  return enumerate(iterable)
 
 # Helpers
 def create_spotify_oauth(scope=None):
@@ -98,6 +116,19 @@ def get_recent_tracks(sp):
   except spotipy.SpotifyException as e:
     logging.error(f"Errore durante il recupero delle tracce recenti: {e}")
     return None
+
+def get_top_artists_and_tracks(sp):
+  try:
+    top_artists_all_time = sp.current_user_top_artists(limit=12, time_range='long_term')
+    top_artists = [artist['name'] for artist in top_artists_all_time['items']]
+    
+    top_tracks_all_time = sp.current_user_top_tracks(limit=12, time_range='long_term')
+    top_tracks = [f"{track['artists'][0]['name']} - {track['name']}" for track in top_tracks_all_time['items']]
+    
+    return top_artists, top_tracks
+  except spotipy.SpotifyException as e:
+    logging.error(f"Errore durante il recupero delle top artist e tracce: {e}")
+    return None, None
 
 if __name__ == '__main__':
   app.run(debug=True, host='0.0.0.0')
