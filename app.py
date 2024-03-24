@@ -47,6 +47,19 @@ def callback():
     return "Errore durante l'autenticazione co Spotify"
   return redirect(url_for('index'))
 
+@app.route('/recent')
+def show_recent():
+  if 'token_info' not in session:
+    return redirect(url_for('login'))
+  
+  sp = create_spotify_client(session['token_info'])
+
+  if sp:
+    recent_tracks = get_recent_tracks(sp)
+    return render_template('recent.html', recent_tracks=recent_tracks)
+  else:
+    return "Errore durante l'autenticazione con spotify"
+
 # Helpers
 def create_spotify_oauth(scope=None):
   return SpotifyOAuth(
@@ -55,6 +68,36 @@ def create_spotify_oauth(scope=None):
     redirect_uri=SPOTIPY_REDIRECT_URI,
     scope=scope
   )
+
+def create_spotify_client(token_info):
+  try:
+    sp_oauth = create_spotify_oauth()
+    sp = spotipy.Spotify(auth_manager=sp_oauth)
+
+    if token_info:
+      sp_oauth.token_info = token_info
+      session.modified = True
+    return sp
+  except Exception as e:
+    logging.error(f"Errore durante l'autenticazione con Spotify: {e}")
+    return None
+
+def get_recent_tracks(sp):
+  try:
+    recent_tracks_data = sp.current_user_recently_played(limit=12)
+    recent_tracks = []
+
+    for item in recent_tracks_data['items']:
+      track_info = {
+        'name': item['track']['name'],
+        'artist': item['track']['artists'][0]['name'],
+        'album_image': item['track']['album']['images'][0]['url'] if item['track']['album']['images'] else None
+      }
+      recent_tracks.append(track_info)
+    return recent_tracks
+  except spotipy.SpotifyException as e:
+    logging.error(f"Errore durante il recupero delle tracce recenti: {e}")
+    return None
 
 if __name__ == '__main__':
   app.run(debug=True, host='0.0.0.0')
